@@ -6,6 +6,7 @@ add_plugin(constant    constant.cpp)
 add_plugin(envmap      envmap.cpp)
 add_plugin(directional directional.cpp)
 add_plugin(spot        spot.cpp)
+add_plugin(spot_led    spot_led.cpp)
 add_plugin(projector   projector.cpp)
 
 # Register the test directory
