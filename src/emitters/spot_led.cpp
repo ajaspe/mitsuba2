@@ -85,7 +85,7 @@ public:
 
         m_cutoff_angle = props.float_("cutoff_angle", 20.0f);
         m_beam_width = props.float_("beam_width", m_cutoff_angle * 3.0f / 4.0f);
-        m_led_mu = props.float_("led_mu", M_PI / 3.0f);
+        m_half_intensity_angle = deg_to_rad(props.float_("half_intensity_angle", (float)M_PI / 3.0f));
         m_cutoff_angle = deg_to_rad(m_cutoff_angle);
         m_beam_width = deg_to_rad(m_beam_width);
         m_inv_transition_width = 1.0f / (m_cutoff_angle - m_beam_width);
@@ -103,20 +103,9 @@ public:
         Vector3f local_dir = normalize(d);
         Float cos_theta = local_dir.z();
 
-        if (m_texture->is_spatially_varying()) {
-            si.uv = Point2f(.5f + .5f * local_dir.x() / (local_dir.z() * m_uv_factor),
-                            .5f + .5f * local_dir.y() / (local_dir.z() * m_uv_factor));
-            result *= m_texture->eval(si, active);
-        }
-
-   /*     UnpolarizedSpectrum beam_res = select(cos_theta >= m_cos_beam_width, result,
-                               result * ((m_cutoff_angle - acos(cos_theta)) * m_inv_transition_width));*/
-
-        Float mu = log(2.) / log(cos(m_led_mu));
+        Float mu = -log(2.) / log(cos(m_half_intensity_angle));
         UnpolarizedSpectrum beam_res = result * pow(cos_theta, mu);
-        //printf("%f\t%f\t%f\n", cos_theta, mu, pow(cos_theta, mu));
 
-        //return select(cos_theta <= m_cos_cutoff_angle, UnpolarizedSpectrum(0.0f), beam_res);
         return beam_res;
     }
 
@@ -188,6 +177,7 @@ public:
             << "  world_transform = " << string::indent(m_world_transform) << "," << std::endl
             << "  intensity = " << m_intensity << "," << std::endl
             << "  cutoff_angle = " << m_cutoff_angle << "," << std::endl
+            << "  half_intensity_angle = " << m_half_intensity_angle << "," << std::endl
             << "  beam_width = " << m_beam_width << "," << std::endl
             << "  texture = " << (m_texture ? string::indent(m_texture) : "")
             << "  medium = " << (m_medium ? string::indent(m_medium) : "")
@@ -201,7 +191,7 @@ private:
     ref<Texture> m_texture;
     ScalarFloat m_beam_width, m_cutoff_angle, m_uv_factor;
     ScalarFloat m_cos_beam_width, m_cos_cutoff_angle, m_inv_transition_width;
-    ScalarFloat m_led_mu;
+    ScalarFloat m_half_intensity_angle;
 };
 
 
